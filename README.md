@@ -80,25 +80,6 @@ guv activate base
 # Invoke-Expression -Command "& '~/.guv/envs/$envname/Scripts/Activate.ps1'"
 ```
 
-Or define a function in your PowerShell profile:
-
-```powershell
-function guv {
-    $out = & "C:\path\to\guv.exe" @args
-    if ($args[0] -eq "activate") {
-        Invoke-Expression -Command "& $out"
-    } else {
-        Write-Output $out
-    }
-}
-```
-
-### Bash / WSL
-
-```bash
-eval "$(./guv activate base)"
-```
-
 ## 🧪 Example Workflow
 
 ```bash
