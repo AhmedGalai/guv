@@ -75,7 +75,9 @@ guv version            # Show version
 ### PowerShell
 
 ```powershell
-Invoke-Expression -Command (guv activate base)
+guv activate base
+# then copy paste the command which follows the format:
+Invoke-Expression -Command "& '~/.guv/envs/{$envname}/Scripts/Activate.ps1'"
 ```
 
 Or define a function in your PowerShell profile:
