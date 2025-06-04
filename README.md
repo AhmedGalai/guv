@@ -70,7 +70,7 @@ guv version            # Show version
 
 ## 🧠 Activating an Environment
 
-`guv` cannot modify the current shell environment directly. You must **run the printed command manually**.
+`guv` currently cannot modify the current shell environment directly. You must **run the printed command manually**.
 
 ### PowerShell
 
@@ -80,7 +80,58 @@ guv activate base
 # Invoke-Expression -Command "& '~/.guv/envs/$envname/Scripts/Activate.ps1'"
 ```
 
-## 🧪 Example Workflow
+it is currently recommended for convenience to add this to your powershell profile:
+
+```powershell
+New-Alias guv "path to compiled guv.exe"
+function Switch-UV {
+    [CmdletBinding()]
+    [Alias('suv')]
+    param ()
+
+    # Get env names
+    $guvenvs = (guv list | grep "- (\S+)").matches.groups | Where-Object name -eq 1 | Select-Object -ExpandProperty value
+
+    if (-not $guvenvs) {
+        Write-Host "No environments found." -ForegroundColor Red
+        return
+    }
+
+    # Write-Host "Available environments:" -ForegroundColor Cyan
+    # for ($i = 0; $i -lt $guvenvs.Count; $i++) {
+    #     Write-Host "$i. $($guvenvs[$i])"
+    # }
+
+    # Prompt for user choice
+    # $choice = Read-Host "Enter the number of the environment to activate"
+
+    # if ($choice -notmatch '^\d+$' -or $choice -ge $guvenvs.Count) {
+    #     Write-Host "Invalid selection." -ForegroundColor Red
+    #     return
+    # }
+
+    # $selectedEnv = $guvenvs[$choice]
+    $selectedEnv = $guvenvs | Out-GridView -Title "Select environment" -OutputMode Single
+
+
+    # Find matching activation command
+    $activationCmd = (guv list | grep "PowerShell: (.*)").matches.groups |
+        Where-Object { $_.name -eq 1 -and $_.value -like "*$selectedEnv*" } |
+        Select-Object -ExpandProperty value
+
+    if (-not $activationCmd) {
+        Write-Host "Activation command not found for $selectedEnv" -ForegroundColor Red
+        return
+    }
+
+    Write-Host "Activating '$selectedEnv'..." -ForegroundColor Green
+    Invoke-Expression $activationCmd
+}
+```
+
+and then use `suv` (Switch-UV) to smoothly switch between global environments
+
+## Bash
 
 ```bash
 guv venv base
@@ -88,7 +139,6 @@ source ~/.guv/envs/base/bin/activate
 uv pip install requests rich
 guv clone base ml
 guv list
-guv activate ml
 source ~/.guv/envs/ml/bin/activate
 guv reset ml
 ```
